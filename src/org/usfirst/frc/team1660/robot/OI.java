@@ -8,6 +8,9 @@
 package org.usfirst.frc.team1660.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.buttons.Button;
+import edu.wpi.first.wpilibj.buttons.JoystickButton;
+import org.usfirst.frc.team1660.robot.commands.*;
 
 /**
  * This class is the glue that binds the controls on the physical operator
@@ -44,12 +47,24 @@ public class OI {
 	// button.whenReleased(new ExampleCommand());
 	
 	
-	Joystick m_driverJoystick;
-	Joystick m_manipulatorJoystick;
+	public Joystick m_driverJoystick;
+	public Joystick m_manipulatorJoystick;
+	public Button 	eat,
+					spit,
+					extend,
+					retract,
+					liftSwitchHeight,
+					liftFloorHeight;
+	
 	
 	public OI() {
 		m_driverJoystick = new Joystick(RobotMap.DRIVER_JOYSTICK_PORT);
 		m_manipulatorJoystick = new Joystick(RobotMap.MANIPULATOR_JOYSTICK_PORT);
+		
+		
+		liftSwitchHeight = new JoystickButton(m_manipulatorJoystick,RobotMap.A_BUTTON);
+		liftSwitchHeight.whenPressed(new ExampleCommand());
+		
 	}
 
 }

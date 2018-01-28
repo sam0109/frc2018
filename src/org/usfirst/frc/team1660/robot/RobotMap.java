@@ -37,6 +37,18 @@ public class RobotMap {
 	public final static int POV_DOWN = 180;
 	public final static int POV_RIGHT = 90;
 	
+	//Drive Joystick
+	public final static int FORWARD_AXIS = LEFT_Y_AXIS;
+	public final static int STRAFE_AXIS = LEFT_X_AXIS;
+	public final static int TURN_AXIS = RIGHT_X_AXIS;
+	
+	public final static int HEADING_Y_AXIS = LEFT_Y_AXIS;
+	public final static int HEADING_X_AXIS = LEFT_X_AXIS;
+	public final static int MOVING_Y_AXIS = RIGHT_Y_AXIS;
+	public final static int MOVING_X_AXIS = RIGHT_X_AXIS;
+	
+	
+	
 	// Joystick ports
 	public final static int DRIVER_JOYSTICK_PORT = 0;
 	public final static int MANIPULATOR_JOYSTICK_PORT = 1;
