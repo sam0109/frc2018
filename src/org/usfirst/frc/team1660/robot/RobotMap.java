@@ -39,7 +39,7 @@ public class RobotMap {
 	
 	// Joystick ports
 	public final static int DRIVER_JOYSTICK_PORT = 0;
-	public final static int MANIPULATOR_JOYSTICK_PORT = 0;
+	public final static int MANIPULATOR_JOYSTICK_PORT = 1;
 	
 	// Drive train motor channels
 	public final static int DRIVE_FRONT_LEFT_CHANNEL = 3;

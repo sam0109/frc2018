@@ -13,7 +13,7 @@ import java.lang.Math;
 /**
  * The subsystem that manages the robot's movement.
  */
-public class LocomotionSubsystem extends Subsystem
+public class DriveSubsystem extends Subsystem
 {
 	// Put methods for controlling this subsystem
 	// here. Call these from Commands.
@@ -32,7 +32,7 @@ public class LocomotionSubsystem extends Subsystem
 	private double m_clockwiseRotationSpeed;
 	private double m_angleOffset;
 	
-	public LocomotionSubsystem()
+	public DriveSubsystem()
 	{
 		m_frontLeft = new WPI_TalonSRX(RobotMap.DRIVE_FRONT_LEFT_CHANNEL);
 		m_backLeft = new WPI_TalonSRX(RobotMap.DRIVE_BACK_LEFT_CHANNEL);
@@ -65,7 +65,7 @@ public class LocomotionSubsystem extends Subsystem
 	
 	public void moveNorthContinuous(double speed)
 	{
-		m_forwardSpeed = speed * Math.cos(getTrueAngle());
+		m_forwardSpeed = speed * Math.cos(getTrueAngle()); //if using a MecanumDrive object and feeding it an angle parameter, you may not need this...
 	}
 	
 	public void moveEastContinuous(float speed)
@@ -85,7 +85,7 @@ public class LocomotionSubsystem extends Subsystem
 		m_clockwiseRotationSpeed = 0;
 	}
 	
-	public void executeMovement()
+	public void drive()
 	{
 		// TODO: Not sure if this is correct, we need to calibrate it.
 		m_mecDrive.driveCartesian(m_strafeRightSpeed, m_forwardSpeed, m_clockwiseRotationSpeed, 0);
