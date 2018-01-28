@@ -31,6 +31,7 @@ public class MecDriveSimpleCommand extends Command {
 	protected void initialize() {
 		driverStick = Robot.m_oi.m_driverJoystick;
 		Robot.m_DriveSubsystem.enable();
+		Robot.m_DriveSubsystem.stop();
 
 	}
 
