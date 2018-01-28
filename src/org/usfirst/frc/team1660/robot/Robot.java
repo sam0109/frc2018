@@ -1,186 +1,134 @@
-/*
- * Code for the Harlem Knights (FRC 1660) Robot for 2018
- * website: www.hk1660.com
- * online repository: www.github.com/hk1660/frc2018
- */
+/*----------------------------------------------------------------------------*/
+/* Copyright (c) 2017-2018 FIRST. All Rights Reserved.                        */
+/* Open Source Software - may be modified and shared by FRC teams. The code   */
+/* must be accompanied by the FIRST BSD license file in the root directory of */
+/* the project.                                                               */
+/*----------------------------------------------------------------------------*/
 
 package org.usfirst.frc.team1660.robot;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-
-import edu.wpi.first.wpilibj.DriverStation;
-
-/*-----IMPORTED LIBRARIES-----*/
-
-import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.command.Command;
+import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Timer;
+import org.usfirst.frc.team1660.robot.commands.ExampleCommand;
+import org.usfirst.frc.team1660.robot.subsystems.LiftSubsystem;
+import org.usfirst.frc.team1660.robot.subsystems.LocomotionSubsystem;
+import org.usfirst.frc.team1660.robot.subsystems.MouthSubsystem;
 
+/**
+ * The VM is configured to automatically run this class, and to call the
+ * functions corresponding to each mode, as described in the TimedRobot
+ * documentation. If you change the name of this class or the package after
+ * creating this project, you must also update the build.properties file in the
+ * project.
+ */
+public class Robot extends TimedRobot
+{
+	public static final LiftSubsystem m_LiftSubsystem = new LiftSubsystem();
+	public static final LocomotionSubsystem m_locomotionSubsystem = new LocomotionSubsystem();
+	public static final MouthSubsystem m_mouthSubsystem = new MouthSubsystem();
+	public static OI m_oi;
 
-public class Robot<m_robotDrive> extends IterativeRobot {
+	Command m_autonomousCommand;
+	SendableChooser<Command> m_chooser = new SendableChooser<>();
 
-	Joystick driverStick = new Joystick(0);
-	Joystick maniStick = new Joystick(1);
-	HKDrive hkdrive = new HKDrive(driverStick);
-	Lift liftMani = new Lift(maniStick);
-	Mouth mouthMani = new Mouth(maniStick);
-	//Lidar laser = new Lidar();
-	Lidar2 laser2 = new Lidar2();
-	SendableChooser strategy = new SendableChooser();
-	SendableChooser position = new SendableChooser();
-	Timer timerAuto = new Timer();
+	/**
+	 * This function is run when the robot is first started up and should be
+	 * used for any initialization code.
+	 */
+	@Override
+	public void robotInit()
+	{
+		m_oi = new OI();
+		m_chooser.addDefault("Default Auto", new ExampleCommand());
+		// chooser.addObject("My Auto", new MyAutoCommand());
+		SmartDashboard.putData("Auto mode", m_chooser);
+	}
 
-	/*----- REQUIRED FRC MAIN METHODS -----*/
-	public void robotInit() {
-
-		hkdrive.driveInit();		//Initialize the HKDrive speed controllers
-		liftMani.liftInit();
-		mouthMani.mouthInit();
-		//laser.initLidar();
+	/**
+	 * This function is called once each time the robot enters Disabled mode.
+	 * You can use it to reset any subsystem information you want to clear when
+	 * the robot is disabled.
+	 */
+	@Override
+	public void disabledInit()
+	{
 
 	}
 
-	
-	//AUTONOMOUS MODE
-
-	/* Autonomous Stuff \o/ -Khalil */
-	public void autonomous() {
-
-		//AUTO_INIT
-
-		// Auto mode strategies setup
-		strategy.addDefault("runGoForwardOnly", new Integer(1));
-		strategy.addObject("runToSwitchSimpleDrop", new Integer(2));
-		strategy.addObject("runToSwitchDecideDirectionDrop", new Integer(3));
-		strategy.addObject("runToScaleDrop", new Integer(4));
-		SmartDashboard.putData("strategy selector", strategy); 
-
-		position.addDefault("Left", new Integer(1));
-		position.addObject("Middle", new Integer(2));
-		position.addObject("Right", new Integer(3));
-		SmartDashboard.putData("position selector", position); 
-
-		
-		//gets the direction of our alliance plates from FMS (OurSwitch > Scale > OtherSwitch)
-		String gameData = DriverStation.getInstance().getGameSpecificMessage();
-		char rowOne;
-		char rowTwo;
-		char rowThree;
-
-		timerAuto.start();
-		int currentStrategy = (int) strategy.getSelected();
-		int currentPosition = (int) position.getSelected();
-		hkdrive.resetAngle();
-
-		//AUTO_PERIODIC
-		while(isAutonomous() && isEnabled()){ 
-
-			//get current Auto time for SmartDash
-			double autoTime = timerAuto.get();
-			SmartDashboard.putNumber("autoTime",autoTime);
-
-			//stores the plate colors
-			rowOne = gameData.charAt(0);
-			rowTwo = gameData.charAt(1);
-			rowThree = gameData.charAt(2);
-
-			//deciding on which strategy to run
-			if(currentStrategy == 1) {
-				runGoForwardOnly(autoTime, currentPosition);
-			} else if (currentStrategy == 2){
-				runToSwitchSimpleDrop(autoTime, currentPosition, rowOne);
-			} else if (currentStrategy == 3){
-				runToSwitchDecideDirectionDrop(autoTime, currentPosition, rowTwo);
-			} else if (currentStrategy == 4){
-				runToScaleDrop(autoTime, currentPosition, rowTwo);
-			}
-
-		}
-
+	@Override
+	public void disabledPeriodic()
+	{
+		Scheduler.getInstance().run();
 	}
 
+	/**
+	 * This autonomous (along with the chooser code above) shows how to select
+	 * between different autonomous modes using the dashboard. The sendable
+	 * chooser code works with the Java SmartDashboard. If you prefer the
+	 * LabVIEW Dashboard, remove all of the chooser code and uncomment the
+	 * getString code to get the auto name from the text box below the Gyro
+	 *
+	 * <p>You can add additional auto modes by adding additional commands to the
+	 * chooser code above (like the commented example) or additional comparisons
+	 * to the switch structure below with additional strings & commands.
+	 */
+	@Override
+	public void autonomousInit()
+	{
+		m_autonomousCommand = m_chooser.getSelected();
 
-	//TELEOP MODE
-	public void teleopInit() { 
+		/*
+		 * String autoSelected = SmartDashboard.getString("Auto Selector",
+		 * "Default"); switch(autoSelected) { case "My Auto": autonomousCommand
+		 * = new MyAutoCommand(); break; case "Default Auto": default:
+		 * autonomousCommand = new ExampleCommand(); break; }
+		 */
 
-	}
-
-	public void teleopPeriodic() {
-
-		hkdrive.checkDriving();
-		hkdrive.checkAutoTurn();
-		hkdrive.getCurrentAngle();
-		hkdrive.checkResetAngle();
-
-		mouthMani.checkEatSpit();
-
-		liftMani.getEncoder();
-		liftMani.checkEncoderZero();
-		liftMani.checkLiftPoints();
-		liftMani.checkElevatorLift();
-
-		//laser.getDistance();
-		laser2.getDistance_inches();
-
-	}
-
-
-
-
-	/*----- AUTONOMOUS STRATEGY METHODS -----*/
-	
-	//AUTO STRATEGY #1: Go forward for 2 seconds and cross the autoline -Marlahna
-	public void runGoForwardOnly(double timeA, int position ) {
-
-		//go forward for times 0.0 - 2.0
-		if(timeA < 2.0){
-			hkdrive.goForwardPercentOutput(0.5);
-		}
-		
-		//stop
-		else {
-			hkdrive.stop();
+		// schedule the autonomous command (example)
+		if (m_autonomousCommand != null) {
+			m_autonomousCommand.start();
 		}
 	}
 
-	//AUTO STRATEGY #2: Go forward to a particular plate of our switch, drop off the powercube if its the correct one -Marlahna
-	public void runToSwitchSimpleDrop(double timeB, int position, char row) {
+	/**
+	 * This function is called periodically during autonomous.
+	 */
+	@Override
+	public void autonomousPeriodic()
+	{
+		Scheduler.getInstance().run();
+	}
 
-		//go forward for times 0.0 - 2.0
-		if(timeB < 2.0){
-			hkdrive.goForwardPercentOutput(0.5);
-		}
-
-		//spit out powercube
-		else if(timeB > 2.0 && timeB < 3.0){
-			hkdrive.goForwardPercentOutput(0.5);
-		}
-
-		//stop
-		else {
-			hkdrive.stop();
+	@Override
+	public void teleopInit()
+	{
+		// This makes sure that the autonomous stops running when
+		// teleop starts running. If you want the autonomous to
+		// continue until interrupted by another command, remove
+		// this line or comment it out.
+		if (m_autonomousCommand != null)
+		{
+			m_autonomousCommand.cancel();
 		}
 	}
 
-	//AUTO STRATEGY #3: Based on the correct location of our alliance's switch plate, travel in that direction and drop off a powercube
-	public void runToSwitchDecideDirectionDrop(double timeC, int position, char row) {
-
+	/**
+	 * This function is called periodically during operator control.
+	 */
+	@Override
+	public void teleopPeriodic()
+	{
+		Scheduler.getInstance().run();
 	}
 
-	//AUTO STRATEGY #4: Go forward to the scale and drop off a cube if its the correct plate
-	public void runToScaleDrop(double timeD, int position, char row) {
-
-
+	/**
+	 * This function is called periodically during test mode.
+	 */
+	@Override
+	public void testPeriodic()
+	{
 	}
-
-
-
-
-
-
 }
-
-
